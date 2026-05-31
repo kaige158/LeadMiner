@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+build/
+dist/
+*.spec
+*.csv
+leads_*.csv
+*.log
+.vscode/
+.idea/
+venv/
+env/
+.venv/
+.claude/

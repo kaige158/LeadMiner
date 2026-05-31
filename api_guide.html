@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搜索引擎API接入指南 - 外贸客户查找工具</title>
+<style>
+  :root {
+    --bg: #1a1a2e; --card: #16213e; --card2: #1c2a45;
+    --primary: #2F5496; --accent: #4a90d9; --green: #2E7D32;
+    --orange: #e67e22; --red: #c0392b;
+    --text: #e0e0e0; --text2: #a0b0c0; --text3: #718096;
+    --border: #2a3a55;
+  }
+  [data-theme="light"] {
+    --bg: #f5f7fa; --card: #ffffff; --card2: #f0f4f8;
+    --primary: #2F5496; --accent: #3a6bc5; --green: #2E7D32;
+    --orange: #d35400; --red: #c0392b;
+    --text: #1a1a2e; --text2: #4a5568; --text3: #a0aec0;
+    --border: #e2e8f0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text);
+    line-height: 1.7; min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--primary), #1a3a6c);
+    padding: 40px 20px; text-align: center;
+  }
+  .header h1 { font-size: 28px; color: #fff; margin-bottom: 8px; }
+  .header p { color: #a0b4d0; font-size: 15px; }
+  .theme-toggle {
+    position: fixed; top: 16px; right: 20px; z-index: 100;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 16px; border-radius: 20px;
+    cursor: pointer; font-size: 13px; transition: all .2s;
+  }
+  .theme-toggle:hover { border-color: var(--accent); }
+
+  /* Container */
+  .container { max-width: 900px; margin: -20px auto 40px; padding: 0 16px; position: relative; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-radius: 12px; overflow: hidden; }
+  .tab-btn {
+    flex: 1; padding: 14px 20px; border: none; cursor: pointer;
+    background: var(--card); color: var(--text2);
+    font-size: 15px; font-weight: 600; transition: all .2s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { background: var(--accent); color: #fff; }
+
+  /* Content */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 28px; margin-bottom: 20px;
+  }
+  .card h2 { font-size: 20px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+  .card .subtitle { color: var(--text3); font-size: 13px; margin-bottom: 20px; }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .badge-free { background: #e8f5e9; color: var(--green); }
+  .badge-paid { background: #fff3e0; color: var(--orange); }
+  [data-theme="dark"] .badge-free { background: #1b3a1b; }
+  [data-theme="dark"] .badge-paid { background: #3a2a10; }
+
+  /* Steps */
+  .step { display: flex; gap: 16px; margin-bottom: 22px; }
+  .step-num {
+    width: 36px; height: 36px; min-width: 36px;
+    background: var(--accent); color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; margin-top: 2px;
+  }
+  .step-body h4 { font-size: 15px; margin-bottom: 4px; color: var(--text); }
+  .step-body p { color: var(--text2); font-size: 13px; }
+
+  /* Code / URL blocks */
+  .url-box {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 16px; margin: 8px 0 16px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 13px; color: var(--accent); word-break: break-all;
+  }
+  .copy-btn {
+    float: right; background: var(--accent); color: #fff;
+    border: none; padding: 4px 12px; border-radius: 6px;
+    cursor: pointer; font-size: 12px; transition: opacity .2s;
+  }
+  .copy-btn:hover { opacity: .85; }
+  .copy-btn.copied { background: var(--green); }
+
+  .field-box {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px; margin: 12px 0;
+  }
+  .field-box .label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .field-box .value { font-family: "Consolas", "Courier New", monospace; font-size: 14px; color: var(--accent); word-break: break-all; }
+
+  /* Tips */
+  .tip {
+    background: var(--card2); border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 16px 0;
+    font-size: 13px; color: var(--text2);
+  }
+  .tip strong { color: var(--accent); }
+  .tip.warn { border-left-color: var(--orange); }
+  .tip.warn strong { color: var(--orange); }
+
+  /* Comparison table */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: var(--card2); color: var(--text3); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  td { color: var(--text); }
+  tr:hover td { background: var(--card2); }
+
+  /* FAQ */
+  details { margin-bottom: 12px; }
+  details summary {
+    background: var(--card2); padding: 14px 18px; border-radius: 8px;
+    cursor: pointer; font-weight: 600; color: var(--text);
+    list-style: none; user-select: none;
+  }
+  details summary::after { content: " ▸"; float: right; color: var(--text3); }
+  details[open] summary::after { content: " ▾"; }
+  details .answer { padding: 16px 18px; color: var(--text2); font-size: 14px; }
+
+  /* Back link */
+  .back-link { text-align: center; margin-top: 40px; }
+  .back-link a { color: var(--text3); text-decoration: none; font-size: 13px; }
+  .back-link a:hover { color: var(--accent); }
+
+  /* Screenshot placeholder */
+  .screenshot {
+    background: var(--card2); border: 1px dashed var(--border);
+    border-radius: 8px; padding: 40px; text-align: center;
+    color: var(--text3); margin: 16px 0; font-size: 13px;
+  }
+
+  @media (max-width: 600px) {
+    .header h1 { font-size: 22px; }
+    .card { padding: 18px; }
+    .step { gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀ 浅色模式</button>
+
+<div class="header">
+  <h1>🔍 搜索引擎API接入指南</h1>
+  <p>外贸客户查找工具 · 免费API密钥申请 · 从此告别拦截</p>
+</div>
+
+<div class="container">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('google')">Google API</button>
+    <button class="tab-btn" onclick="switchTab('bing')">Bing API</button>
+    <button class="tab-btn" onclick="switchTab('compare')">对比 & FAQ</button>
+  </div>
+
+  <!-- ====== GOOGLE TAB ====== -->
+  <div id="tab-google" class="tab-content active">
+    <div class="card">
+      <h2>Google Custom Search API <span class="badge badge-free">免费 100次/天</span></h2>
+      <p class="subtitle">约10分钟完成，需Google账号</p>
+
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>创建 Programmable Search Engine</h4>
+          <p>打开以下网址，点击 <strong>"开始使用"</strong> 或 <strong>"新增"</strong></p>
+          <div class="url-box">
+            <button class="copy-btn" onclick="copyUrl(this, 'https://programmablesearchengine.google.com/')">复制</button>
+            https://programmablesearchengine.google.com/
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>配置搜索范围</h4>
+          <p>
+            • <strong>搜索引擎名称</strong>：随意填，比如 "Global Search"<br>
+            • <strong>搜索范围</strong>：<mark>一定选"搜索整个网络"</mark>（否则只能搜指定网站）<br>
+            • 勾选 "启用图片搜索"（可选）<br>
+            • 点击 <strong>"创建"</strong>
+          </p>
+          <div class="tip warn">
+            <strong>⚠ 关键步骤：</strong>必须选"搜索整个网络"，否则你的搜索范围会被限制在单个网站，无法发现新客户。
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>获取搜索引擎 ID (CX)</h4>
+          <p>创建完成后，页面会显示你的 <strong>"搜索引擎 ID"</strong>（一串类似 <code>a1b2c3d4e5f6g7h8i</code> 的字符串）。这就是你需要填入工具的 <strong>CX</strong> 字段。</p>
+          <div class="field-box">
+            <div class="label">搜索引擎 ID（即 CX）</div>
+            <div class="value" id="cx-placeholder">a1b2c3d4e5f6g7h8i &nbsp;← 这是示例，用你自己的</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>获取 API Key</h4>
+          <p>在搜索引擎控制台页面，点击左下角 <strong>"自定义搜索API"</strong> 或直接打开：</p>
+          <div class="url-box">
+            <button class="copy-btn" onclick="copyUrl(this, 'https://console.cloud.google.com/apis/credentials')">复制</button>
+            https://console.cloud.google.com/apis/credentials
+          </div>
+          <p style="margin-top:10px">
+            • 首次使用会提示创建项目 → 点"创建"<br>
+            • 点击 <strong>"创建凭据" → "API密钥"</strong><br>
+            • 复制生成的密钥 → 填入工具中的 <strong>"Google: API Key"</strong>
+          </p>
+          <div class="tip">
+            <strong>💡 提示：</strong>创建后可以在凭据页面限制API密钥的使用范围（可选，留空也行）。免费额度 100次/天对个人使用完全够用。
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>填入工具开始使用</h4>
+          <p>将上面获得的 <strong>API Key</strong> 和 <strong>CX</strong> 填入桌面工具的对应输入框，勾选 Google 引擎 → 搜索即可。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== BING TAB ====== -->
+  <div id="tab-bing" class="tab-content">
+    <div class="card">
+      <h2>Bing Web Search API <span class="badge badge-free">免费 1000次/月</span></h2>
+      <p class="subtitle">约5分钟完成，需Microsoft账号。比Google申请更简单，只有一个Key。</p>
+
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>打开 Azure 门户</h4>
+          <p>登录你的 Microsoft 账号（没有就注册一个，免费）</p>
+          <div class="url-box">
+            <button class="copy-btn" onclick="copyUrl(this, 'https://portal.azure.com/#create/Microsoft.BingSearch')">复制</button>
+            https://portal.azure.com/#create/Microsoft.BingSearch
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>创建 Bing Search 资源</h4>
+          <p>
+            • <strong>订阅</strong>：选"免费试用"或已有的订阅<br>
+            • <strong>资源组</strong>：点"新建"，随便起个名（如 "bing-search"）<br>
+            • <strong>名称</strong>：随意填<br>
+            • <strong>定价层</strong>：<mark>⚠ 一定选 <strong>F0（免费层）</strong></mark>，千万别选S开头的付费层！<br>
+            • 勾选条款 → 点 <strong>"创建"</strong>
+          </p>
+          <div class="tip warn">
+            <strong>⚠ 注意：</strong>F0 免费层每月 1000 次调用，完全够用。S1 及以上的付费层会收费！
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>获取 API Key</h4>
+          <p>
+            • 部署完成后 → 点 <strong>"转到资源"</strong><br>
+            • 左侧菜单 → <strong>"密钥和终结点"</strong><br>
+            • 复制 <strong>"密钥1"</strong> 或 <strong>"密钥2"</strong>（两个都可以用）
+          </p>
+          <div class="field-box">
+            <div class="label">API Key（Azure订阅密钥）</div>
+            <div class="value">1a2b3c4d5e6f7g8h9i0j... &nbsp;← 这是示例</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>填入工具开始使用</h4>
+          <p>将密钥复制到桌面工具中的 <strong>"Bing: API Key"</strong> 输入框，勾选 Bing 引擎 → 搜索即可。</p>
+          <div class="tip">
+            <strong>💡 Bing 只需要一个 Key，没有 CX 这种东西。</strong>比 Google 申请流程少一半步骤。1000次/月 ≈ 每天33次，日常使用足够。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== COMPARE TAB ====== -->
+  <div id="tab-compare" class="tab-content">
+    <div class="card">
+      <h2>三个搜索引擎对比</h2>
+      <p class="subtitle">选哪个？看这里一目了然</p>
+
+      <table>
+        <tr>
+          <th>对比项</th>
+          <th>DuckDuckGo</th>
+          <th>Bing API</th>
+          <th>Google API</th>
+        </tr>
+        <tr>
+          <td><strong>免费额度</strong></td>
+          <td><span class="badge badge-free">无限</span></td>
+          <td><span class="badge badge-free">1000次/月</span></td>
+          <td><span class="badge badge-free">100次/天</span></td>
+        </tr>
+        <tr>
+          <td><strong>是否需要密钥</strong></td>
+          <td>❌ 不需要</td>
+          <td>✅ 1个 Key</td>
+          <td>✅ Key + CX（2个）</td>
+        </tr>
+        <tr>
+          <td><strong>申请难度</strong></td>
+          <td>无</td>
+          <td>⭐ 简单</td>
+          <td>⭐⭐ 稍复杂</td>
+        </tr>
+        <tr>
+          <td><strong>稳定性</strong></td>
+          <td>⭐​⭐​⭐​⭐​⭐ 极稳</td>
+          <td>⭐​⭐​⭐​⭐​⭐ 极稳</td>
+          <td>⭐​⭐​⭐​⭐​⭐ 极稳</td>
+        </tr>
+        <tr>
+          <td><strong>结果质量</strong></td>
+          <td>⭐​⭐​⭐​⭐ 较好</td>
+          <td>⭐​⭐​⭐​⭐​⭐ 很好</td>
+          <td>⭐​⭐​⭐​⭐​⭐ 最好</td>
+        </tr>
+        <tr>
+          <td><strong>国家精准度</strong></td>
+          <td>中等</td>
+          <td>高（mkt参数）</td>
+          <td>高（lr+cr参数）</td>
+        </tr>
+        <tr>
+          <td><strong>适合场景</strong></td>
+          <td>日常使用，零门槛</td>
+          <td>需要Bing结果的用户</td>
+          <td>需要Google结果的用户</td>
+        </tr>
+        <tr>
+          <td><strong>被拦截风险</strong></td>
+          <td>极低</td>
+          <td>无（官方API）</td>
+          <td>无（官方API）</td>
+        </tr>
+      </table>
+
+      <div class="tip" style="margin-top:20px">
+        <strong>📌 推荐方案：</strong>日常用 DuckDuckGo（免费无限），花5分钟申请 Bing API 做备份。需要Google结果时再申请Google API。三条路都通了，再也不怕搜不到。
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="card">
+      <h2>常见问题</h2>
+
+      <details>
+        <summary>为什么不用API就会失败？</summary>
+        <div class="answer">
+          Google 和 Bing 检测到来自服务器/程序的直接请求时，会弹出验证码（CAPTCHA）来区分人和机器。
+          因为我们的工具是程序（不是浏览器），无法完成"选出所有红绿灯"这类人机验证，所以被拦截。<br><br>
+          使用官方 API 则不同——API 是 Google/Bing 官方提供的程序化接口，
+          他们允许通过 API 访问，只是有每天的调用次数限制。这就是为什么 API 从不被拦截。
+        </div>
+      </details>
+
+      <details>
+        <summary>DuckDuckGo 为什么不会被拦截？</summary>
+        <div class="answer">
+          DuckDuckGo（DDG）本身就是隐私搜索引擎，对爬虫宽容。我们使用的 ddgs 库底层用
+          <strong>模拟浏览器指纹</strong>的 TLS 库（模仿 Chrome/Edge 的加密握手特征），
+          让 DDG 以为是真实浏览器在访问，所以不会触发验证码。<br><br>
+          此外，DDG 调用的是 Bing 的搜索结果（DDG 自己不爬网页），所以结果质量接近 Bing。
+          这是目前最稳定且完全免费的方案。
+        </div>
+      </details>
+
+      <details>
+        <summary>免费额度用完了怎么办？</summary>
+        <div class="answer">
+          Google：100次/天。如果每天用量很大，可以在 Google Cloud Console 申请提额或付费。<br>
+          Bing：1000次/月。Bing 的 F0 层不支持提额，超出后需要升级到 S1 付费层（约$7/1000次）。<br><br>
+          其实日常使用 100次/天 绰绰有余——你搜索一次只需要调用1次API（搜索本身），
+          后续的网站访问和分析不消耗API额度。DuckDuckGo 更是不限次数。
+        </div>
+      </details>
+
+      <details>
+        <summary>多个搜索引擎可以同时用吗？</summary>
+        <div class="answer">
+          可以！勾选多个引擎后，工具会依次调用每个引擎搜索，然后合并去重。
+          建议日常只用 DuckDuckGo，如果需要对特定国家做更精准的搜索，再开启 Bing API 或 Google API。
+        </div>
+      </details>
+
+      <details>
+        <summary>工具填的密钥安全吗？会被上传吗？</summary>
+        <div class="answer">
+          密钥保存在你的电脑本地（<code>~/.number_finder_settings.json</code>），
+          只会发送到 Google/Bing 的官方 API 服务器，不会被上传到任何第三方。
+          代码完全开源，你可以自行审查 <code>number_finder.py</code> 中的 <code>search_google_api</code> 和 <code>search_bing_api</code> 函数。
+        </div>
+      </details>
+    </div>
+  </div>
+
+</div>
+
+<div class="back-link">
+  <a href="..">← 返回工具目录</a>
+</div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const btn = document.getElementById('themeBtn');
+  const isDark = html.getAttribute('data-theme') !== 'light';
+  if (isDark) {
+    html.setAttribute('data-theme', 'light');
+    btn.textContent = '🌙 深色模式';
+  } else {
+    html.removeAttribute('data-theme');
+    btn.textContent = '☀ 浅色模式';
+  }
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelector(`[onclick="switchTab('${name}')"]`).classList.add('active');
+}
+
+function copyUrl(btn, url) {
+  navigator.clipboard.writeText(url).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '已复制!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
