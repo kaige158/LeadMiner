@@ -24,7 +24,7 @@ if %errorlevel% neq 0 (
 
 REM 打包
 echo [2/3] 开始打包...
-pyinstaller --onefile --windowed --name "客户号码查找工具" --clean --noconfirm --add-data "number_finder.py;." number_finder_gui.py
+pyinstaller --onefile --windowed --name "文人·客户查找工具" --clean --noconfirm --add-data "number_finder.py;." --add-data "api_guide.html;." number_finder_gui.py
 
 if %errorlevel% neq 0 (
     echo [错误] 打包失败
@@ -35,7 +35,7 @@ if %errorlevel% neq 0 (
 REM 完成
 echo [3/3] 打包完成！
 echo.
-echo 可执行文件位于: dist\客户号码查找工具.exe
+echo 可执行文件位于: dist\文人·客户查找工具.exe
 echo 将该文件发送给他人即可直接使用（无需安装Python）。
 echo.
 
