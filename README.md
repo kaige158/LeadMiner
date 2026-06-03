@@ -22,13 +22,6 @@
   <em>Type a product keyword → Auto-search business websites worldwide → Extract emails & phone numbers → Export to CSV/Excel</em>
 </p>
 
-<p align="center">
-  <!-- 替换为你的 GIF 演示动画 -->
-  <img src="https://via.placeholder.com/800x450/2F5496/ffffff?text=LeadMiner+Demo+GIF+-+Coming+Soon" alt="LeadMiner Demo" width="800">
-  <br>
-  <sub>⬆️ 录一个 15-30 秒的操作演示 GIF 替换这里，效果翻倍 ⬆️</sub>
-</p>
-
 ---
 
 ## 📖 目录 | Table of Contents
