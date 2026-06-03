@@ -144,7 +144,7 @@ Targets major trade markets across Europe, Americas, and Asia-Pacific — each r
   <b>🎨 GUI 搜索配置页 | Search Configuration Panel</b>
   <br><br>
   <!-- 替换为实际截图 -->
-  <img src="https://via.placeholder.com/800x500/1a1a2e/e0e0e0?text=LeadMiner+-+Search+Config+Screenshot" alt="Search Config" width="800">
+  <img src="界面.png" alt="Search Config" width="800">
   <br>
   <sub>关键词输入、地区勾选（按大洲分组）、搜索引擎选择、结果数滑块、API 密钥折叠面板</sub>
 </p>
