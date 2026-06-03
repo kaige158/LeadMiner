@@ -155,7 +155,7 @@ Targets major trade markets across Europe, Americas, and Asia-Pacific — each r
   <b>📊 GUI 搜索结果页 | Results Table View</b>
   <br><br>
   <!-- 替换为实际截图 -->
-  <img src="https://via.placeholder.com/800x500/1e2430/e0e0e0?text=LeadMiner+-+Results+Screenshot" alt="Search Results" width="800">
+  <img src="结果.png" alt="Search Config" width="800">
   <br>
   <sub>实时表格展示、双击打开网站、一键导出 CSV/Excel/复制邮箱、引擎状态实时指示器</sub>
 </p>
